@@ -11,10 +11,12 @@ with open(os.path.join(here, 'README.rst')) as fp:
     README = fp.read()
 
 with open(os.path.join(here, 'requirements/master.txt')) as fp:
-    install_requires = map(lambda st: st.strip(), fp.readlines())
+    install_requires = list(map(lambda st: st.strip(), fp.readlines()))
 
 with open(os.path.join(here, 'requirements/test.txt')) as fp:
-    test_require = map(lambda st: st.strip(), fp.readlines())
+    test_require = list(map(lambda st: st.strip(), fp.readlines()))
+
+print(install_requires)
 
 src = 'src'
 packages = find_packages(src)
