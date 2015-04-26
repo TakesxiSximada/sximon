@@ -33,7 +33,31 @@ kageyama_negative_words = [
 get_negative_word = lambda: random.choice(kageyama_negative_words)
 
 
-def slack_outcomming(request):
+def slack_outcomming_talk(request):
+    """
+    """
+    text = request.POST['text'].encode('utf8')
+    user_name = request.POST['user_name']
+
+    keywords = [
+        '影',
+        '山',
+        'kageyama',
+        ]
+
+    if user_name == 'slackbot' or not any(keyword in text for keyword in keywords):
+        return Response()
+
+    fmt = get_negative_word()
+    msg = fmt.format(name=user_name)
+
+    return Response(
+        body=json.dumps({'text': msg}),
+        content_type='application/json',
+        )
+
+
+def slack_outcomming_trigger(request):
     """
     token=XXXXXXXXXXXXXXXXXX
     team_id=T0001
@@ -46,12 +70,34 @@ def slack_outcomming(request):
     text=googlebot: What is the air-speed velocity of an unladen swallow?
     trigger_word=googlebot:
     """
-    text = request.POST['text']
+    text = request.POST['text'].encode('utf8')
     user_name = request.POST['user_name']
-    trigger = request.POST['trigger_word']
+    trigger = request.POST.get('trigger_word', '')
+
     if user_name == 'slackbot':
         return Response()
 
+    target_words = [
+        '^\+\+',
+        '^\-\-',
+        '^\!',
+        'kageyama',
+        '影',
+        '山',
+        ]
+
+    for target_word in target_words:
+        regx = re.compile('(?P<trigger>{})'.format(target_word))
+        matching = regx.search(text)
+        if matching:
+            trigger = matching.group('trigger')
+            break
+
+    if not trigger:
+        return Response()
+
+    msg = ''
+    print(trigger)
     if trigger == '++':
         regx = re.compile(r'^\+\+(?P<name>\S+)')
         matching = regx.search(text)
@@ -61,7 +107,7 @@ def slack_outcomming(request):
             count = int(count) if count else 0
             count += 1
             request.redis.hset(int, name, count)
-            text = '{name}様は通算 {count} になりました。'.format(name=name, count=count)
+            msg = '{name}様は通算 {count} になりました。'.format(name=name, count=count)
     elif trigger == '--':
         regx = re.compile(r'^\-\-(?P<name>\S+)')
         matching = regx.search(text)
@@ -72,45 +118,42 @@ def slack_outcomming(request):
             count -= 1
             request.redis.hset(int, name, count)
             fmt = '{name}様は通算 {count} になりました。' + get_negative_word()
-            text = fmt.format(name=name, count=count)
+            msg = fmt.format(name=name, count=count)
     elif trigger == '!':
         regx_say = re.compile(r'^\!say\s+(?P<command>\S+)\s+(name)')
         matching = regx_say.search(text)
         fmt = get_negative_word()
-        text = fmt.format(name=user_name)
+        msg = fmt.format(name=user_name)
 
         if matching:
-            random.random()
             command = matching.group('command')
             name = matching.group('name')
             if command == 'create':
                 if not request.redis.hexists(list, name):
                     request.redis.hset(list, name)
-                    text = '手配致しました。'
+                    msg = '手配致しました。'
                 else:
                     fmt = '{name}様は既に登録されています。' + get_negative_word()
-                    text = fmt.format(name=name)
-
+                    msg = fmt.format(name=name)
         else:  # ユーザ名
-            regx_user_say = re.compile(r'^\!(?P<user_name>\S+)\s+(?P<message>.*)')
+            regx_user_say = re.compile(r'^\!(?P<user_name>\S+)\s*(?P<message>.*)')
             matching = regx_user_say.search(text)
+            print('A'*30)
+            print(matching.group('message') if matching else 'NO MATCH')
+            print('B'*30)
             if matching:
                 user_name = matching.group('user_name')
                 message = matching.group('message').strip()
                 if message:
                     request.redis.sadd(user_name, message)
-                    text = '手配致しました。'
+                    msg = '手配致しました。'
                 else:
-                    text = request.redis.sadd(user_name)
-    elif trigger == 'kageyama':
-        fmt = get_negative_word()
-        text = fmt.format(name=user_name)
-    else:
-        fmt = get_negative_word()
-        text = fmt.format(name=user_name)
+                    msg = request.redis.srandmember(user_name)
+    if not msg:
+        return Response()
 
     return Response(
-        body=json.dumps({'text': text}),
+        body=json.dumps({'text': msg}),
         content_type='application/json',
         )
 
@@ -154,8 +197,11 @@ def main(global_config, **local_config):
     config.add_route('hello', '/hello/{name}')
     config.add_view(hello_world, route_name='hello')
 
-    config.add_route('slack.outcomming', '/slack/outcomming')
-    config.add_view(slack_outcomming, route_name='slack.outcomming')
+    config.add_route('slack.outcomming.talk', '/slack/outcomming/talk')
+    config.add_view(slack_outcomming_talk, route_name='slack.outcomming.talk')
+
+    config.add_route('slack.outcomming.trigger', '/slack/outcomming/trigger')
+    config.add_view(slack_outcomming_trigger, route_name='slack.outcomming.trigger')
 
     config.include('pyramid_redis')
 
