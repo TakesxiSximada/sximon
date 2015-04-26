@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 from pyramid.view import view_config
+from pyramid.response import Response
+
+
+@view_config(route_name='ping')
+def ping_pong(request):
+    """ping / pong"""
+    return Response(body='pong')
 
 
 @view_config(route_name='slack.outcomming', request_method='POST', renderer='json')
@@ -46,7 +53,5 @@ def outcomming(request):
     text = text.strip()
     words = '!', '++', '--'
     if any(text.startswith(word) for word in words):
-
-
-
+        pass
     return {'text': 'message text'}

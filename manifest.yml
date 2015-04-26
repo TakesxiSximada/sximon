@@ -1,0 +1,10 @@
+applications:
+- services:
+  - gero1
+  disk_quota: 1024M
+  host: sximon
+  name: sximon
+  path: .
+  domain: mybluemix.net
+  instances: 1
+  memory: 64M

@@ -11,6 +11,9 @@ def main(global_config, **local_config):
     for plugin in settings.get('plugins', '').split():
         config.include(plugin)
 
-    config.add_route('slack.outcomming', '/outcomming')
+    config.add_route('ping', '/ping')
+    config.add_route('slack.outcomming', '/slack/outcomming')
+
     config.scan()
+
     return config.make_wsgi_app()
