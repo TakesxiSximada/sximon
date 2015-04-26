@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-from wsgiref.simple_server import make_server
 from pyramid.config import Configurator
-from pyramid.response import Response
-
 
 
 def main(global_config, **local_config):
@@ -15,4 +12,5 @@ def main(global_config, **local_config):
         config.include(plugin)
 
     config.add_route('slack.outcomming', '/outcomming')
+    config.scan()
     return config.make_wsgi_app()
