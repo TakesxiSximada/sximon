@@ -1,4 +1,4 @@
-env
-.git
+env/*
+.git/*
 packages.json
-node_modules
+node_modules/*
