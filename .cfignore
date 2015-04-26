@@ -1,0 +1,4 @@
+env
+.git
+packages.json
+node_modules
