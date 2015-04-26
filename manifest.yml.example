@@ -1,0 +1,10 @@
+applications:
+- services:
+  - <MASK>
+  disk_quota: 1024M
+  host: <MASK>
+  name: <MASK>
+  path: .
+  domain: <MASK>.net
+  instances: 1
+  memory: 64M
