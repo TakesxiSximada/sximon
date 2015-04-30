@@ -58,13 +58,18 @@ def slack_outcomming_talk(request):
         '？',
         ]
 
-    if user_name == 'slackbot' or not any(keyword in text for keyword in keywords):
+    if user_name == 'slackbot':
         return Response()
-    print(text)
-    fmt = get_negative_word()
+
     if 'おはよ' in text:
         fmt = 'おはようございます、{name}様。'
+    elif '起き' in text:
+        fmt = 'おはようございます、{name}様。'
     elif 'おやすみ' in text:
+        fmt = 'おやすみなさいませ、{name}様。'
+    elif '寝' in text:
+        fmt = 'おやすみなさいませ、{name}様。'
+    elif '眠' in text:
         fmt = 'おやすみなさいませ、{name}様。'
     elif 'ただいま' in text:
         fmt = 'おかえりなさいませ、{name}様。'
@@ -80,10 +85,14 @@ def slack_outcomming_talk(request):
         fmt = 'お断りいたします。'
     elif 'おねがい' in text:
         fmt = '承りました。'
-    elif '知って' in text:
+    elif '知' in text:
         fmt = 'ggrks'
-    msg = fmt.format(name=user_name)
+    elif any(keyword in text for keyword in keywords):
+        fmt = get_negative_word()
+    else:
+        return Response()
 
+    msg = fmt.format(name=user_name)
     return Response(
         body=json.dumps({'text': msg}),
         content_type='application/json',
