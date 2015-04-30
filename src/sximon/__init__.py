@@ -29,6 +29,16 @@ kageyama_negative_words = [
     '失礼ながら{name}様。{name}様の目はやはり節穴でございましたか。',
     '{name}さまの推理力はやはりずぶの素人以下でございましたか。',
     'そこまでレベルが低いというのであれば私、本気で「ウケる～」でございます。',
+    '大変失礼ながら、{name}様の単純さは、まさに幼稚園児レベルかと思われます。',
+    'お言葉を返すようで恐縮ですが、{name}様のほうこそ、どこに目ン玉お付けになっていらっしゃるのでございますか？',
+    'これだけの情報を得ておきながら、まるで真相に辿り着けないとは、{name}様は、頭がお悪いのではございませんか?',
+    'まさに、{name}様のおっしゃったとおりでございます。確かに、{name}様の凡庸な閃きなど、誰かに話すほどのものではございません。聞くだけ時間の無駄でございました',
+    'なぜ、{name}様は数多くを経験しながら、一ミリも進歩なさらないのでございますか？ひょっとして、わざとでございますか？',
+    '{name}様はわたくしと比べて目だけはよろしいものと思っておりましたが、どうやら見当違いでございました。目の前にあるヒントにまるでお気づきにならないとは……わたくし{name}様には心の底からガッカリでございます',
+    '{name}様、いま少しばかり脳みそをご使用になられてはいかがでございますか',
+    '失礼ながら、{name}様。この程度の謎で頭を悩ませておいでとは、{name}様は本当に役立たずでございますね',
+    '失礼ながら、{name}様は無駄にディナーをお召し上がりになっていらっしゃいます',
+    '{name}様。失礼ながら、{name}様は穀潰しの暇人でございますか？',
     ]
 get_negative_word = lambda: random.choice(kageyama_negative_words)
 
@@ -43,12 +53,33 @@ def slack_outcomming_talk(request):
         '影',
         '山',
         'kageyama',
+        'い',
+        '?',
+        '？',
         ]
 
     if user_name == 'slackbot' or not any(keyword in text for keyword in keywords):
         return Response()
 
     fmt = get_negative_word()
+    if 'おはよう' in text:
+        fmt = 'おはようございます、{}様。'
+    elif 'おやすみ' in text:
+        fmt = 'おやすみなさいませ、{}様。'
+    elif 'ただいま' in text:
+        fmt = 'おかえりなさいませ、{}様。'
+    elif '帰り' in text:
+        fmt = 'お待ちしております、{}様。'
+    elif '帰る' in text:
+        fmt = 'お待ちしております、{}様。'
+    elif 'かえる' in text:
+        fmt = 'お待ちしております、{}様。'
+    elif 'かえり' in text:
+        fmt = 'お待ちしております、{}様。'
+    elif 'お願い' in text:
+        fmt = '承りました。'
+    elif 'おねがい' in text:
+        fmt = '承りました。'
     msg = fmt.format(name=user_name)
 
     return Response(
