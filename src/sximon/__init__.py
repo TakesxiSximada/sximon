@@ -60,26 +60,28 @@ def slack_outcomming_talk(request):
 
     if user_name == 'slackbot' or not any(keyword in text for keyword in keywords):
         return Response()
-
+    print(text)
     fmt = get_negative_word()
-    if 'おはよう' in text:
-        fmt = 'おはようございます、{}様。'
+    if 'おはよ' in text:
+        fmt = 'おはようございます、{name}様。'
     elif 'おやすみ' in text:
-        fmt = 'おやすみなさいませ、{}様。'
+        fmt = 'おやすみなさいませ、{name}様。'
     elif 'ただいま' in text:
-        fmt = 'おかえりなさいませ、{}様。'
+        fmt = 'おかえりなさいませ、{name}様。'
     elif '帰り' in text:
-        fmt = 'お待ちしております、{}様。'
+        fmt = 'お待ちしております、{name}様。'
     elif '帰る' in text:
-        fmt = 'お待ちしております、{}様。'
+        fmt = 'お待ちしております、{name}様。'
     elif 'かえる' in text:
-        fmt = 'お待ちしております、{}様。'
+        fmt = 'お待ちしております、{name}様。'
     elif 'かえり' in text:
-        fmt = 'お待ちしております、{}様。'
+        fmt = 'お待ちしております、{name}様。'
     elif 'お願い' in text:
-        fmt = '承りました。'
+        fmt = 'お断りいたします。'
     elif 'おねがい' in text:
         fmt = '承りました。'
+    elif '知って' in text:
+        fmt = 'ggrks'
     msg = fmt.format(name=user_name)
 
     return Response(
