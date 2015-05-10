@@ -206,22 +206,24 @@ def get_bluemix_redis_credential(settings):
     service_name = clean(settings['sximon.bluemix.redis.master'])
     db = clean(settings['sximon.bluemix.redis.db'])
 
-    text = os.environ['VCAP_SERVICES']
+    text = os.environ.get('VCAP_SERVICES', '{}')
     data = json.loads(text)
-    for redis_settings in data[function_name]:
-        if redis_settings.get('name', None) == service_name:
-            credentials = redis_settings['credentials']
-            url = 'redis://:{secret}@{host}:{port}/{db}'.format(
-                secret=credentials['password'],
-                host=credentials['host'],
-                port=credentials['port'],
-                db=db,
-                )
+    if data:
+        for redis_settings in data[function_name]:
+            if redis_settings.get('name', None) == service_name:
+                credentials = redis_settings['credentials']
+                url = 'redis://:{secret}@{host}:{port}/{db}'.format(
+                    secret=credentials['password'],
+                    host=credentials['host'],
+                    port=credentials['port'],
+                    db=db,
+                    )
 
-            return {
-                'redis.url': url,
-                'redis.max_connections': None,
-                }
+                return {
+                    'redis.url': url,
+                    'redis.max_connections': None,
+                    }
+    return {}
 
 
 def main(global_config, **local_config):
