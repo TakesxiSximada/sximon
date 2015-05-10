@@ -42,7 +42,7 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
         ],
     platforms='any',
-    packages=find_packages(),
+    packages=packages,
     package_dir=package_dir,
     namespace_packages=[
         ],
