@@ -4,6 +4,7 @@ import re
 import json
 import time
 import random
+import urllib.parse
 from wsgiref.simple_server import make_server
 from pyramid.config import Configurator
 from pyramid.response import Response
@@ -200,6 +201,18 @@ def slack_outcomming_trigger(request):
         )
 
 
+def get_docker_redis_credential(settings):
+    redis_port = os.environ.get('REDIS_PORT', None)
+    if not redis_port:
+        return {}
+    urlobj = urllib.parse.urlparse(redis_port)
+    url = 'redis://{}/0'.format(urlobj.netloc)
+    return {
+        'redis.url': url,
+        'redis.max_connections': None,
+        }
+
+
 def get_bluemix_redis_credential(settings):
     clean = lambda s: s.strip('"').strip("'").strip('"')
     function_name = clean(settings['sximon.bluemix.redis.name'])
@@ -232,7 +245,9 @@ def main(global_config, **local_config):
     settings = dict(global_config)
     settings.update(local_config)
 
-    settings.update(get_bluemix_redis_credential(settings))  # update settings for pyramid_redis
+    # update settings for pyramid_redis
+    settings.update(get_bluemix_redis_credential(settings))
+    settings.update(get_docker_redis_credential(settings))
 
     config = Configurator(settings=settings)
     for plugin in settings.get('plugins', '').split():
